@@ -15,7 +15,7 @@ COPY . .
 
 # Menentukan variabel lingkungan untuk Flask
 ENV FLASK_APP=app.py
-ENV FLASK_ENV=development  # Opsional, untuk mode pengembangan
+ENV FLASK_ENV=development 
 
 # Menentukan port yang digunakan oleh container
 EXPOSE 5000
