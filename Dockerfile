@@ -1,24 +1,22 @@
-# Use the official lightweight Python image.
-# https://hub.docker.com/_/python
+# Use a Python base image
 FROM python:3.9-slim
 
-# Allow statements and log messages to immediately appear in the Knative logs
-ENV PYTHONUNBUFFERED True
+# Set the working directory
+WORKDIR /app
 
-# Copy local code to the container image.
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-COPY . ./
-ENV PORT 5000
+# Copy the requirements file and install dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install production dependencies.
-RUN pip install -r requirements.txt
+# Copy the rest of the application code
+COPY . .
 
-EXPOSE 5000
+# Set environment variables for Flask
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
 
-# Run the web service on container startup. Here we use the gunicorn
-# webserver, with one worker process and 8 threads.
-# For environments with multiple CPU cores, increase the number of workers
-# to be equal to the cores available.
-# Timeout is set to 0 to disable the timeouts of the workers to allow Cloud Run to handle instance scaling.
-CMD [ "flask" , "run"]
+# Expose the port that Flask runs on
+EXPOSE 8080
+
+# Run the Flask app using gunicorn for production
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
