@@ -1,23 +1,24 @@
-# Use the official lightweight Python image.
-# https://hub.docker.com/_/python
-FROM python:3.10-slim
+# Menggunakan image Python sebagai dasar
+FROM python:3.9
 
-# Allow statements and log messages to immediately appear in the logs
-ENV PYTHONUNBUFFERED True
+# Menentukan direktori kerja di dalam container
+WORKDIR /app
 
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 -y
-RUN apt install -y libgl1-mesa-glx -y
-# Copy local code to the container image.
-ENV APP_HOME /app
-WORKDIR $APP_HOME
-COPY . ./
+# Menyalin file requirements.txt ke dalam container
+COPY requirements.txt requirements.txt
 
-# Install production dependencies.
-RUN pip install -r requirements.txt
+# Menginstal semua dependensi yang ada di requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Run the web service on container startup. Here we use the gunicorn
-# webserver, with one worker process and 8 threads.
-# For environments with multiple CPU cores, increase the number of workers
-# to be equal to the cores available.
-# Timeout is set to 0 to disable the timeouts of the workers to allow Cloud Run to handle instance scaling.
-CMD ["flask", "run"]
+# Menyalin semua file dari direktori lokal ke dalam direktori kerja di container
+COPY . .
+
+# Menentukan variabel lingkungan untuk Flask
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=development  # Opsional, untuk mode pengembangan
+
+# Menentukan port yang digunakan oleh container
+EXPOSE 5000
+
+# Menjalankan perintah untuk menjalankan aplikasi Flask
+CMD ["flask", "run", "--host=0.0.0.0"]
